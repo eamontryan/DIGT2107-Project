@@ -29,7 +29,7 @@ Many students and professionals struggle to balance work and school commitments,
 - Professionals enrolled in academic programs
 
 ### Project Goals
-- Develop a mobile and desktop-friendly application with an intuitive interface.
+- Web application with an intuitive interface.
 - Provide real-time task prioritization and scheduling.
 - Offer analytics and reports to help users improve their time management.
 - Integrate calendar syncing across devices to unify work and school tasks.
