@@ -1,7 +1,3 @@
-Here’s a README for your repository based on the information provided:
-
----
-
 # Time Management Application
 
 **Repository Link**: [DIGT2107-Project](https://github.com/eamontryan/DIGT2107-Project)
