@@ -61,6 +61,9 @@
     },
     "transformIgnorePatterns": [
       "node_modules/(?!(axios)/)"
-    ]
+    ],
+    "collectCoverage": true,
+    "coverageReporters": ["json", "text", "lcov", "clover"],
+    "coverageDirectory": "coverage"
   }
 }
