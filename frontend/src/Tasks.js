@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './Tasks.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const priorityOrder = ['Low', 'Medium', 'High', 'Critical'];
 
@@ -23,27 +23,26 @@ const Tasks = () => {
   const addTask = (e) => {
     e.preventDefault();
     axios.post('http://localhost:3001/tasks', task)
-      .then(() => {
-        setTasks([...tasks, { ...task, synced: false }]);
+      .then((response) => {
+        setTasks([...tasks, { ...task, id: response.data.id, synced: false }]);
         setTask({ title: '', priority: 'Low', dueDate: '', dueTime: '' });
       })
       .catch(error => console.error('Error adding task:', error));
   };
 
-  const deleteTask = (index) => {
-    axios.delete(`http://localhost:3001/tasks/${index}`)
+  const deleteTask = (taskId) => {
+    axios.delete(`http://localhost:3001/tasks/${taskId}`)
       .then(() => {
-        setTasks(tasks.filter((_, i) => i !== index));
+        setTasks(tasks.filter((task) => task.id !== taskId));
       })
       .catch(error => console.error('Error deleting task:', error));
   };
 
-  const syncTaskToCalendar = (task, index) => {
+  const syncTaskToCalendar = (task) => {
     if (task.synced) return;
     axios.post('http://localhost:3001/calendar/events', task)
       .then(() => {
-        const updatedTasks = [...tasks];
-        updatedTasks[index].synced = true;
+        const updatedTasks = tasks.map(t => t.id === task.id ? { ...t, synced: true } : t);
         setTasks(updatedTasks);
         alert('Task synced to Google Calendar!');
       })
@@ -51,9 +50,9 @@ const Tasks = () => {
   };
 
   const syncAllTasks = () => {
-    tasks.forEach((task, index) => {
+    tasks.forEach((task) => {
       if (!task.synced) {
-        syncTaskToCalendar(task, index);
+        syncTaskToCalendar(task);
       }
     });
   };
@@ -69,60 +68,67 @@ const Tasks = () => {
   };
 
   return (
-    <div>
-      <h1>Task Management</h1>
-
+    <div className="container mt-5">
       {authUrl && (
-        <a href={authUrl} target="_blank" rel="noopener noreferrer">
+        <a className="btn btn-outline-primary d-block mx-auto mb-3" href={authUrl} target="_blank" rel="noopener noreferrer">
           Authenticate with Google Calendar
         </a>
       )}
 
-      <form onSubmit={addTask}>
-        <input
-          type="text"
-          placeholder="Task Title"
-          value={task.title}
-          onChange={e => setTask({ ...task, title: e.target.value })}
-          required
-        />
-        <select
-          value={task.priority}
-          onChange={e => setTask({ ...task, priority: e.target.value })}
-        >
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="High">High</option>
-          <option value="Critical">Critical</option>
-        </select>
-        <input
-          type="date"
-          value={task.dueDate}
-          onChange={e => setTask({ ...task, dueDate: e.target.value })}
-          required
-        />
-        <input
-          type="time"
-          value={task.dueTime}
-          onChange={e => setTask({ ...task, dueTime: e.target.value })}
-        />
-        <button type="submit">Add Task</button>
+      <form className="card p-4 shadow-sm mb-4" onSubmit={addTask}>
+        <div className="mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Task Title"
+            value={task.title}
+            onChange={e => setTask({ ...task, title: e.target.value })}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <select className="form-select" value={task.priority} onChange={e => setTask({ ...task, priority: e.target.value })}>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </div>
+        <div className="mb-3">
+          <input
+            type="date"
+            className="form-control"
+            value={task.dueDate}
+            onChange={e => setTask({ ...task, dueDate: e.target.value })}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <input
+            type="time"
+            className="form-control"
+            value={task.dueTime}
+            onChange={e => setTask({ ...task, dueTime: e.target.value })}
+          />
+        </div>
+        <button type="submit" className="btn btn-primary w-100">Add Task</button>
       </form>
 
-      <button onClick={sortTasksByPriority}>
+      <button className="btn btn-secondary me-2" onClick={sortTasksByPriority}>
         {isAscending ? 'Sort Descending' : 'Sort Ascending'}
       </button>
-      <button onClick={syncAllTasks}>Sync All</button>
+      <button className="btn btn-success" onClick={syncAllTasks}>Sync All</button>
 
-      <ul>
-        {tasks.map((task, index) => (
-          <li key={index}>
-            {task.title} - {task.priority} - Due: {task.dueDate} {task.dueTime && `at ${task.dueTime}`}
-            {task.synced ? <span className="badge">Synced</span> : null}
-            <button disabled={task.synced} onClick={() => syncTaskToCalendar(task, index)}>
-              {task.synced ? 'Synced' : 'Sync'}
-            </button>
-            <button onClick={() => deleteTask(index)}>Delete</button>
+      <ul className="list-group mt-4">
+        {tasks.map((task) => (
+          <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
+            <span>{task.title} - {task.priority} - Due: {task.dueDate} {task.dueTime && `at ${task.dueTime}`}</span>
+            <div>
+              <button className="btn btn-outline-success me-2" disabled={task.synced} onClick={() => syncTaskToCalendar(task)}>
+                {task.synced ? 'Synced' : 'Sync'}
+              </button>
+              <button className="btn btn-danger" onClick={() => deleteTask(task.id)}>Delete</button>
+            </div>
           </li>
         ))}
       </ul>
