@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import TaskService from './taskService';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const priorityOrder = ['Low', 'Medium', 'High', 'Critical'];
@@ -11,57 +11,74 @@ const Tasks = () => {
   const [authUrl, setAuthUrl] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:3001/tasks')
-      .then(response => setTasks(response.data))
-      .catch(error => console.error('Error fetching tasks:', error));
-
-    axios.get('http://localhost:3001/auth/google')
-      .then(response => setAuthUrl(response.data.url))
-      .catch(error => console.error('Error fetching Google Auth URL:', error));
+    fetchTasks();
+    fetchAuthUrl();
   }, []);
 
-  const addTask = (e) => {
+  const fetchTasks = async () => {
+    try {
+      const data = await TaskService.getTasks();
+      setTasks(data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
+
+  const fetchAuthUrl = async () => {
+    try {
+      const url = await TaskService.getAuthUrl();
+      setAuthUrl(url);
+    } catch (error) {
+      console.error('Error fetching Google Auth URL:', error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setTask({ ...task, [e.target.name]: e.target.value });
+  };
+
+  const addTask = async (e) => {
     e.preventDefault();
-    axios.post('http://localhost:3001/tasks', task)
-      .then((response) => {
-        setTasks([...tasks, { ...task, id: response.data.id, synced: false }]);
-        setTask({ title: '', priority: 'Low', dueDate: '', dueTime: '' });
-      })
-      .catch(error => console.error('Error adding task:', error));
+    try {
+      const newTask = await TaskService.addTask(task);
+      setTasks([...tasks, { ...newTask, synced: false }]);
+      setTask({ title: '', priority: 'Low', dueDate: '', dueTime: '' });
+    } catch (error) {
+      console.error('Error adding task:', error);
+    }
   };
 
-  const deleteTask = (taskId) => {
-    axios.delete(`http://localhost:3001/tasks/${taskId}`)
-      .then(() => {
-        setTasks(tasks.filter((task) => task.id !== taskId));
-      })
-      .catch(error => console.error('Error deleting task:', error));
+  const deleteTask = async (taskId) => {
+    try {
+      await TaskService.deleteTask(taskId);
+      setTasks(tasks.filter((t) => t.id !== taskId));
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
   };
 
-  const syncTaskToCalendar = (task) => {
+  const syncTaskToCalendar = async (task) => {
     if (task.synced) return;
-    axios.post('http://localhost:3001/calendar/events', task)
-      .then(() => {
-        const updatedTasks = tasks.map(t => t.id === task.id ? { ...t, synced: true } : t);
-        setTasks(updatedTasks);
-        alert('Task synced to Google Calendar!');
-      })
-      .catch(error => console.error('Error syncing task to calendar:', error));
+    try {
+      await TaskService.syncTask(task);
+      setTasks(tasks.map(t => t.id === task.id ? { ...t, synced: true } : t));
+      alert('Task synced to Google Calendar!');
+    } catch (error) {
+      console.error('Error syncing task:', error);
+    }
   };
 
   const syncAllTasks = () => {
     tasks.forEach((task) => {
-      if (!task.synced) {
-        syncTaskToCalendar(task);
-      }
+      if (!task.synced) syncTaskToCalendar(task);
     });
   };
 
   const sortTasksByPriority = () => {
     const sortedTasks = [...tasks].sort((a, b) => {
-      const aPriority = priorityOrder.indexOf(a.priority);
-      const bPriority = priorityOrder.indexOf(b.priority);
-      return isAscending ? aPriority - bPriority : bPriority - aPriority;
+      return isAscending
+        ? priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority)
+        : priorityOrder.indexOf(b.priority) - priorityOrder.indexOf(a.priority);
     });
     setTasks(sortedTasks);
     setIsAscending(!isAscending);
@@ -76,41 +93,12 @@ const Tasks = () => {
       )}
 
       <form className="card p-4 shadow-sm mb-4" onSubmit={addTask}>
-        <div className="mb-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Task Title"
-            value={task.title}
-            onChange={e => setTask({ ...task, title: e.target.value })}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <select className="form-select" value={task.priority} onChange={e => setTask({ ...task, priority: e.target.value })}>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-            <option value="Critical">Critical</option>
-          </select>
-        </div>
-        <div className="mb-3">
-          <input
-            type="date"
-            className="form-control"
-            value={task.dueDate}
-            onChange={e => setTask({ ...task, dueDate: e.target.value })}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <input
-            type="time"
-            className="form-control"
-            value={task.dueTime}
-            onChange={e => setTask({ ...task, dueTime: e.target.value })}
-          />
-        </div>
+        <input type="text" className="form-control mb-3" name="title" placeholder="Task Title" value={task.title} onChange={handleInputChange} required />
+        <select className="form-select mb-3" name="priority" value={task.priority} onChange={handleInputChange}>
+          {priorityOrder.map(p => <option key={p} value={p}>{p}</option>)}
+        </select>
+        <input type="date" className="form-control mb-3" name="dueDate" value={task.dueDate} onChange={handleInputChange} required />
+        <input type="time" className="form-control mb-3" name="dueTime" value={task.dueTime} onChange={handleInputChange} />
         <button type="submit" className="btn btn-primary w-100">Add Task</button>
       </form>
 
