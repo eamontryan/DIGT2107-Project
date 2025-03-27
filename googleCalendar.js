@@ -1,27 +1,15 @@
 const { google } = require('googleapis');
-const path = require('path');
-const fs = require('fs');
 require('dotenv').config();
 
-const credentialsPath = path.join(__dirname, 'credentials.json');
+// Load credentials from environment variables
+const client_id = process.env.GOOGLE_CLIENT_ID;
+const client_secret = process.env.GOOGLE_CLIENT_SECRET;
+const redirect_uris = process.env.GOOGLE_REDIRECT_URI;
 
-const loadCredentials = () => {
-  try {
-    const credentials = JSON.parse(fs.readFileSync(credentialsPath));
-    const { client_id, client_secret, redirect_uris } = credentials.web || {};
-
-    if (!client_id || !client_secret || !redirect_uris) {
-      throw new Error('Invalid credentials: Missing client_id, client_secret, or redirect_uris.');
-    }
-
-    return { client_id, client_secret, redirect_uris };
-  } catch (error) {
-    console.error('Error loading credentials.json:', error);
-    process.exit(1);
-  }
-};
-
-const { client_id, client_secret, redirect_uris } = loadCredentials();
+if (!client_id || !client_secret || !redirect_uris) {
+  console.error('Missing Google API credentials in environment variables.');
+  process.exit(1);
+}
 
 const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
@@ -33,12 +21,16 @@ oAuth2Client.on('tokens', (tokens) => {
   oAuth2Client.setCredentials(tokens);
 });
 
-const getAuthUrl = () => oAuth2Client.generateAuthUrl({
-  access_type: 'offline',
-  prompt: 'consent',
-  scope: ['https://www.googleapis.com/auth/calendar.events'],
-});
+// Generate the authentication URL
+const getAuthUrl = () => {
+  return oAuth2Client.generateAuthUrl({
+    access_type: 'offline',
+    prompt: 'consent',
+    scope: ['https://www.googleapis.com/auth/calendar.events'],
+  });
+};
 
+// Add an event to Google Calendar
 const addEventToCalendar = async (event) => {
   const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
   try {
