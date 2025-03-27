@@ -22,6 +22,14 @@ mongoose.connect(process.env.MONGO_URI, {
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch(err => console.error('Failed to connect to MongoDB:', err));
 
+// Recreates credentials.json file from base64 string
+  const fs = require('fs');
+
+if (process.env.GOOGLE_CREDENTIALS_B64) {
+  const decoded = Buffer.from(process.env.GOOGLE_CREDENTIALS_B64, 'base64').toString('utf-8');
+  fs.writeFileSync('credentials.json', decoded);
+}
+  
 // Routes
 app.use('/tasks', taskRoutes);
 app.use('/auth', authRoutes);
