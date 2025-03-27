@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001';
+const API_URL = 'https://digt2107-project.onrender.com';
 
 const getTasks = async () => {
   const response = await axios.get(`${API_URL}/tasks`);
