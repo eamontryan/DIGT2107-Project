@@ -8,4 +8,4 @@ const taskSchema = new mongoose.Schema({
   synced: { type: Boolean, default: false },
 });
 
-module.exports = mongoose.model('Task', taskSchema);s
+module.exports = mongoose.model('Task', taskSchema);
