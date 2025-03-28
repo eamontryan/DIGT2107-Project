@@ -25,7 +25,6 @@ router.get('/', async (req, res, next) => {
 
 // Delete a task by ID
 router.delete('/:id', async (req, res, next) => {
-  console.log('Deleting task with id:', req.params.id)
   try {
     await Task.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: 'Task deleted' });

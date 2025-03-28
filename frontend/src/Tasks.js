@@ -51,7 +51,7 @@ const Tasks = () => {
   const deleteTask = async (taskId) => {
     try {
       await TaskService.deleteTask(taskId);
-      setTasks(tasks.filter((t) => t.id !== taskId));
+      setTasks(tasks.filter((t) => t._id !== taskId));
     } catch (error) {
       console.error('Error deleting task:', error);
     }
@@ -61,7 +61,7 @@ const Tasks = () => {
     if (task.synced) return;
     try {
       await TaskService.syncTask(task);
-      setTasks(tasks.map(t => t.id === task._id ? { ...t, synced: true } : t));
+      setTasks(tasks.map(t => t._id === task._id ? { ...t, synced: true } : t));
       alert('Task synced to Google Calendar!');
     } catch (error) {
       console.error('Error syncing task:', error);
