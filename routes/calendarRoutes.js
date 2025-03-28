@@ -14,17 +14,14 @@ router.post('/events', async (req, res, next) => {
     ? new Date(startDateTime.getTime() + 60 * 60 * 1000) // 1-hour event
     : new Date(`${dueDate}T23:59:59`);
 
-  const padTime = (val) => (val < 10 ? `0${val}` : `${val}`);
   const event = {
     summary: `${title} - ${priority}`,
     start: {
-      dateTime: `${dueDate}T${dueTime || '00:00'}:00`,
+      dateTime: startDateTime.toISOString(),
       timeZone: 'America/Toronto',
     },
     end: {
-      dateTime: dueTime
-        ? `${dueDate}T${padTime(endDateTime.getHours())}:${padTime(endDateTime.getMinutes())}:00`
-        : `${dueDate}T23:59:59`,
+      dateTime: endDateTime.toISOString(),
       timeZone: 'America/Toronto',
     },
   };
