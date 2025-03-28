@@ -56,7 +56,7 @@ describe("Task Manager Component", () => {
         fireEvent.click(deleteButton);
 
         await waitFor(() => {
-            expect(axios.delete).toHaveBeenCalledWith(`https://digt2107-project.onrender.com/tasks/${mockTask.id}`);
+            expect(axios.delete).toHaveBeenCalledWith(`https://digt2107-project.onrender.com/tasks/${mockTask._id}`);
         });
 
         await waitFor(() => {

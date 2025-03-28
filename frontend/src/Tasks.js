@@ -61,7 +61,7 @@ const Tasks = () => {
     if (task.synced) return;
     try {
       await TaskService.syncTask(task);
-      setTasks(tasks.map(t => t.id === task.id ? { ...t, synced: true } : t));
+      setTasks(tasks.map(t => t.id === task._id ? { ...t, synced: true } : t));
       alert('Task synced to Google Calendar!');
     } catch (error) {
       console.error('Error syncing task:', error);
@@ -109,13 +109,13 @@ const Tasks = () => {
 
       <ul className="list-group mt-4">
         {tasks.map((task) => (
-          <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
+          <li key={task._id} className="list-group-item d-flex justify-content-between align-items-center">
             <span>{task.title} - {task.priority} - Due: {task.dueDate} {task.dueTime && `at ${task.dueTime}`}</span>
             <div>
               <button className="btn btn-outline-success me-2" disabled={task.synced} onClick={() => syncTaskToCalendar(task)}>
                 {task.synced ? 'Synced' : 'Sync'}
               </button>
-              <button className="btn btn-danger" onClick={() => deleteTask(task.id)}>Delete</button>
+              <button className="btn btn-danger" onClick={() => deleteTask(task._id)}>Delete</button>
             </div>
           </li>
         ))}
