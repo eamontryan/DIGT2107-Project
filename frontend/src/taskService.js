@@ -25,4 +25,4 @@ const syncTask = async (task) => {
   await axios.post(`${API_URL}/calendar/events`, task);
 };
 
-export default { getTasks, getAuthUrl, addTask, deleteTask, syncTask };
+export default { getTasks, getAuthUrl, addTask, deleteTask, syncTask }; 
