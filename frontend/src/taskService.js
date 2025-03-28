@@ -18,16 +18,8 @@ const addTask = async (task) => {
 };
 
 const deleteTask = async (taskId) => {
-    try {
-      // Make sure taskId is a valid MongoDB _id string
-      const response = await axios.delete(`/tasks/${taskId}`);
-      console.log('Delete response:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('Error deleting task:', error);
-      throw error;
-    }
-  };
+  await axios.delete(`${API_URL}/tasks/${taskId}`);
+};
 
 const syncTask = async (task) => {
   await axios.post(`${API_URL}/calendar/events`, task);
