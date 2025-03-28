@@ -38,15 +38,39 @@ const Tasks = () => {
   };
 
   const addTask = async (e) => {
-    e.preventDefault();
-    try {
-      const newTask = await TaskService.addTask(task);
-      setTasks([...tasks, { ...newTask, synced: false }]);
-      setTask({ title: '', priority: 'Low', dueDate: '', dueTime: '' });
-    } catch (error) {
-      console.error('Error adding task:', error);
+  e.preventDefault();
+  try {
+    const { title, priority, dueDate, dueTime } = task;
+
+    let adjustedTime = dueTime;
+
+    if (dueTime) {
+      // Convert dueDate + dueTime into a Date object in local time
+      const localDateTime = new Date(`${dueDate}T${dueTime}`);
+
+      // Get the UTC offset for EST (without daylight saving): UTC-5
+      const estOffset = -5 * 60; // in minutes
+
+      // Apply EST offset
+      const estDateTime = new Date(localDateTime.getTime() + (localDateTime.getTimezoneOffset() + estOffset) * 60000);
+
+      // Format EST time back to HH:MM (24h)
+      adjustedTime = estDateTime.toTimeString().slice(0, 5); // returns "HH:MM"
     }
-  };
+
+    const newTask = await TaskService.addTask({
+      title,
+      priority,
+      dueDate,
+      dueTime: adjustedTime,
+    });
+
+    setTasks([...tasks, { ...newTask, synced: false }]);
+    setTask({ title: '', priority: 'Low', dueDate: '', dueTime: '' });
+  } catch (error) {
+    console.error('Error adding task:', error);
+  }
+};
 
   const deleteTask = async (taskId) => {
     try {
