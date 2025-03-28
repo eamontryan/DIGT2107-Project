@@ -11,7 +11,7 @@ if (!client_id || !client_secret || !redirect_uris) {
   process.exit(1);
 }
 
-const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris);
 
 oAuth2Client.on('tokens', (tokens) => {
   if (tokens.refresh_token) {
