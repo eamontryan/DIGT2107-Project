@@ -26,7 +26,7 @@ describe("Task Manager Component", () => {
         fireEvent.click(addButton);
 
         await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith("http://localhost:3001/tasks", {
+            expect(axios.post).toHaveBeenCalledWith("https://digt2107-project.onrender.com/tasks", {
                 title: "Test Task",
                 priority: "Low",
                 dueDate: "",
@@ -56,7 +56,7 @@ describe("Task Manager Component", () => {
         fireEvent.click(deleteButton);
 
         await waitFor(() => {
-            expect(axios.delete).toHaveBeenCalledWith(`http://localhost:3001/tasks/${mockTask.id}`);
+            expect(axios.delete).toHaveBeenCalledWith(`https://digt2107-project.onrender.com/tasks/${mockTask.id}`);
         });
 
         await waitFor(() => {
